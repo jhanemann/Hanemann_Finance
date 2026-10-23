@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1F4A35">
 <title>Hanemann Finance — Dashboard</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23B4863A'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='36' font-weight='700' fill='%231E4A33' text-anchor='middle'%3EH%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -443,6 +444,180 @@
     .cfg-columns{ grid-template-columns:1fr; }
     .cfg-info-grid{ grid-template-columns:repeat(2,1fr); }
   }
+
+  /* =====================================================================
+     CELULAR (iPhone e similares, até 760 px)
+     Menu lateral oculto + cartões no lugar de tabelas largas
+     ===================================================================== */
+  .m-topbar, .menu-backdrop{ display:none; }
+
+  @media (max-width: 760px){
+    html{ -webkit-text-size-adjust:100%; }
+    body{ overflow-x:hidden; }
+    .shell{ grid-template-columns:minmax(0,1fr); }
+    main{ min-width:0; padding:calc(64px + env(safe-area-inset-top)) 14px 48px; }
+    header.top{ margin-bottom:16px; }
+    .top-title h1{ font-size:22px; }
+
+    /* ---- barra superior com o botão de menu ---- */
+    .m-topbar{
+      display:flex; align-items:center; gap:6px; position:fixed; top:0; left:0; right:0; z-index:250;
+      height:calc(52px + env(safe-area-inset-top)); padding:env(safe-area-inset-top) 10px 0 6px;
+      background:var(--sidebar-bg); color:#EDF2EA; box-shadow:0 1px 0 rgba(255,255,255,.06);
+    }
+    .m-menu-btn{
+      width:44px; height:44px; border:none; background:transparent; color:#EDF2EA; border-radius:10px;
+      display:flex; align-items:center; justify-content:center; cursor:pointer; flex:none;
+    }
+    .m-menu-btn:active{ background:rgba(237,242,234,.12); }
+    .m-menu-btn svg{ width:24px; height:24px; }
+    .m-topbar .m-title{ font-family:'Fraunces',serif; font-size:17px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .m-topbar .m-sync{ margin-left:auto; font-size:11px; color:#B9C7BC; white-space:nowrap; }
+
+    /* ---- menu lateral que desliza da esquerda ---- */
+    .sidebar{
+      position:fixed; z-index:300; top:0; bottom:0; left:0; width:272px; max-width:84vw;
+      flex-direction:column; align-items:stretch; overflow-x:hidden; overflow-y:auto; -webkit-overflow-scrolling:touch;
+      padding:calc(26px + env(safe-area-inset-top)) 0 calc(20px + env(safe-area-inset-bottom));
+      transform:translateX(-105%); visibility:hidden;
+      transition:transform .26s ease, visibility 0s linear .26s;
+    }
+    body.menu-open .sidebar{ transform:translateX(0); visibility:visible; transition:transform .26s ease, visibility 0s; box-shadow:10px 0 40px rgba(0,0,0,.5); }
+    .sidebar::after{ display:none; }
+    .brand{ border-bottom:1px solid rgba(237,242,234,.12); padding:0 24px 22px; margin-bottom:14px; }
+    nav.tabs{ flex-direction:column; padding:0 12px; }
+    .tab-btn span.label{ display:inline; }
+    .tab-btn{ padding:15px 12px; font-size:15.5px; }
+    .tab-btn .num{ font-size:11px; width:22px; }
+    .sidebar-foot{ display:block; margin-top:auto; }
+    .menu-backdrop{
+      display:block; position:fixed; inset:0; z-index:290; background:rgba(0,0,0,.5);
+      opacity:0; pointer-events:none; transition:opacity .26s ease;
+    }
+    body.menu-open .menu-backdrop{ opacity:1; pointer-events:auto; }
+    body.menu-open{ overflow:hidden; }
+    .modal-backdrop{ z-index:350; padding:70px 12px; }
+
+    /* ---- campos maiores e confortáveis para o dedo (16 px evita o zoom do iOS) ---- */
+    input, select, textarea{ font-size:16px !important; }
+    .field-inline input, .field-inline select, .field input, .field select{ height:46px; padding:10px 12px; }
+    .field-inline label{ font-size:11.5px; }
+    .btn{ min-height:44px; justify-content:center; text-align:center; }
+    .btn.small{ min-height:42px; font-size:14px; }
+    .fsbanner{ padding:12px; }
+
+    /* ---- formulários (Movimentações, Financiamento, Operações) ---- */
+    .mov-form-card{ padding:16px 14px; border-radius:14px; }
+    .mov-form-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px 10px; align-items:start; }
+    .mov-form-row > .field-inline{ width:100%; min-width:0; flex:none !important; }
+    .mov-form-row .type-w, .mov-form-row .desc-w, .mov-form-row .cat-w, .mov-form-row .btn-w,
+    .mov-form-row .pag-w{ grid-column:1 / -1; }
+    .mov-form-row .pag-w:has(+ #movParcelaField:not(.hidden)){ grid-column:auto; }
+    .mov-form-row .type-w .type-toggle{ height:48px; }
+    .mov-form-row .type-w .type-toggle button{ height:48px; font-size:15px; }
+    .mov-form-row .btn-w > label:first-child:not(:only-child){ display:none; }   /* some rótulos vazios que só ocupavam espaço */
+    .mov-form-row .btn-w .btn{ width:100%; height:52px; font-size:16px; justify-content:center; text-align:center; }
+    .mov-form-row .btn-w label[style]{ height:44px !important; font-size:15px !important; text-transform:none; letter-spacing:0; color:var(--ink); }
+    .mov-form-row .btn-w input[type=checkbox]{ width:22px !important; height:22px !important; }
+    #movValor{ font-size:18px !important; font-family:'IBM Plex Mono',monospace; }
+    #tab-fin .mov-form-row .valor-w{ grid-column:1 / -1; }
+    .mov-form-hint{ font-size:12px; }
+
+    /* ---- listas em formato de cartão ---- */
+    .mov-hist-card{ padding:12px; border-radius:14px; }
+    #tab-mov .mov-hist-card:last-of-type, #tab-orc .mov-hist-card, #tab-fin .mov-hist-card{ background:transparent; border:none; box-shadow:none; padding:0; }
+    .mov-toolbar input[type="text"]{ flex:1 1 100%; min-width:0; height:46px; }
+    .mov-toolbar select.mini{ flex:1 1 auto; height:44px; }
+    #tab-mov .mov-table-wrap, #tab-orc .mov-table-wrap, #tab-fin .mov-table-wrap{ border:none; border-radius:0; overflow:visible; }
+    #tab-mov table.mov-table, #tab-orc table.mov-table, #tab-fin table.mov-table{ min-width:0; display:block; width:100%; }
+    #tab-mov .mov-table thead, #tab-orc .mov-table thead, #tab-fin .mov-table thead{ display:none; }
+    #tab-mov .mov-table tbody, #tab-orc .mov-table tbody, #tab-fin .mov-table tbody{ display:block; }
+    #tab-mov .mov-table tbody tr, #tab-orc .mov-table tbody tr, #tab-fin .mov-table tbody tr{
+      display:grid; gap:6px 10px; padding:12px 12px 12px; margin-bottom:10px;
+      background:var(--card); border:1px solid var(--border); border-radius:12px;
+    }
+    #tab-mov .mov-table tbody tr:hover, #tab-orc .mov-table tbody tr:hover, #tab-fin .mov-table tbody tr:hover{ background:var(--card); }
+    #tab-mov .mov-table tbody td, #tab-orc .mov-table tbody td, #tab-fin .mov-table tbody td{
+      padding:0; border:none; white-space:normal; min-width:0; overflow-wrap:anywhere;
+    }
+    #tab-mov .mov-table tbody td[colspan], #tab-orc .mov-table tbody td[colspan], #tab-fin .mov-table tbody td[colspan]{ grid-column:1 / -1 !important; grid-row:1 !important; }
+    #tab-mov .mov-table tbody tr.dia-atual, #tab-fin .mov-table tbody tr.mes-atual{ background:var(--green-tint); border-color:var(--green); box-shadow:inset 4px 0 0 var(--green); }
+
+    /* Movimentações: 4 colunas -> descrição/valor, data/pagamento/parcela/tipo, categoria/ações */
+    #tab-mov .mov-table tbody tr{ grid-template-columns:auto auto 1fr auto; align-items:center; }
+    #tab-mov .mov-table td:nth-child(1){ grid-column:1 / 4; grid-row:1; font-size:15px; font-weight:600; }
+    #tab-mov .mov-table td:nth-child(7){ grid-column:4; grid-row:1; text-align:right; font-size:15px; white-space:nowrap; }
+    #tab-mov .mov-table td:nth-child(6){ grid-column:1; grid-row:2; font-size:12px; color:var(--muted); }
+    #tab-mov .mov-table td:nth-child(4){ grid-column:2; grid-row:2; font-size:12px; color:var(--muted); }
+    #tab-mov .mov-table td:nth-child(5){ grid-column:3; grid-row:2; font-size:12px; color:var(--muted); }
+    #tab-mov .mov-table td:nth-child(2){ grid-column:4; grid-row:2; justify-self:end; }
+    #tab-mov .mov-table td:nth-child(3){ grid-column:1 / 4; grid-row:3; font-size:12.5px; font-weight:500; color:var(--ink-soft); }
+    #tab-mov .mov-table td:nth-child(8){ grid-column:4; grid-row:3; justify-self:end; }
+    #tab-mov .row-actions{ gap:6px; }
+    #tab-mov .row-actions button{ border:1px solid var(--border); padding:8px 12px; font-size:13px; color:var(--ink-soft); background:var(--card); }
+    #tab-mov .row-actions button.row-del{ color:var(--brick); }
+
+    /* Orçamento: categoria em cima e três valores lado a lado */
+    #tab-orc .mov-table tbody tr{ grid-template-columns:1fr 1fr 1fr; align-items:start; }
+    #tab-orc .mov-table td:nth-child(1){ grid-column:1 / -1; font-size:15px; font-weight:600; }
+    #tab-orc .mov-table tbody tr:not(:has(td[colspan])) td:nth-child(n+2){ display:flex; flex-direction:column; gap:4px; font-size:13px; }
+    #tab-orc .mov-table td:nth-child(2)::before{ content:'Planejado'; }
+    #tab-orc .mov-table td:nth-child(3)::before{ content:'Realizado'; }
+    #tab-orc .mov-table td:nth-child(4)::before{ content:'Diferença'; }
+    #tab-orc .mov-table td:nth-child(n+2)::before{ font-family:'IBM Plex Sans',sans-serif; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+    .orc-table input.orc-planejado{ width:100%; height:42px; font-size:16px !important; }
+    #tab-orc .rel-filters{ display:grid; grid-template-columns:1fr 1fr; gap:12px 10px; align-items:end; }
+    #tab-orc .rel-filters .field-inline{ width:100%; min-width:0; }
+    #tab-orc .rel-filters .btn-w, #tab-orc .rel-filters .field-inline:nth-child(4){ grid-column:1 / -1; }
+    #tab-orc .rel-filters .btn-w > label{ display:none; }
+    #tab-orc .rel-filters select.mini{ width:100%; height:46px; padding:10px 28px 10px 12px; }
+    #tab-orc .rel-filters .btn-w .btn{ width:100%; height:46px; }
+
+    /* Financiamento: cartão compacto por parcela */
+    #tab-fin .mov-table tbody tr{ grid-template-columns:repeat(3,minmax(0,1fr)); align-items:center; }
+    #tab-fin .fin-table tbody td{ overflow-wrap:normal; }
+    #tab-fin .fin-table td{ min-width:0; }
+    #tab-fin .fin-table td:nth-child(1){ grid-column:1; grid-row:1; font-size:15px; font-weight:700; line-height:1.25; }
+    #tab-fin .fin-table td:nth-child(1)::before{ content:'Parcela '; font-weight:600; color:var(--ink-soft); }
+    #tab-fin .fin-table td:nth-child(2){ grid-column:2; grid-row:1; font-size:13px; color:var(--muted); }
+    #tab-fin .fin-table td:nth-child(7){ grid-column:3; grid-row:1; }
+    #tab-fin .fin-table td:nth-child(7) select{ height:42px; width:100%; min-width:0; }
+    /* linha 2: três valores */
+    #tab-fin .fin-table tbody tr:not(:has(td[colspan])) td:nth-child(3),
+    #tab-fin .fin-table tbody tr:not(:has(td[colspan])) td:nth-child(4),
+    #tab-fin .fin-table tbody tr:not(:has(td[colspan])) td:nth-child(5),
+    #tab-fin .fin-table tbody tr:not(:has(td[colspan])) td:nth-child(6),
+    #tab-fin .fin-table tbody tr:not(:has(td[colspan])) td:nth-child(8),
+    #tab-fin .fin-table tbody tr:not(:has(td[colspan])) td:nth-child(9),
+    #tab-fin .fin-table tbody tr:not(:has(td[colspan])) td:nth-child(10){ display:flex; flex-direction:column; gap:3px; font-size:12.5px; }
+    #tab-fin .fin-table td:nth-child(n+3):not(:nth-child(7))::before{ font-family:'IBM Plex Sans',sans-serif; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+    #tab-fin .fin-table td:nth-child(3)::before{ content:'Parcela'; }
+    #tab-fin .fin-table td:nth-child(4)::before{ content:'Principal'; }
+    #tab-fin .fin-table td:nth-child(5)::before{ content:'Juros'; }
+    #tab-fin .fin-table td:nth-child(6)::before{ content:'Saldo devedor'; }
+    #tab-fin .fin-table td:nth-child(8)::before{ content:'Data do pagamento'; }
+    #tab-fin .fin-table td:nth-child(9)::before{ content:'Valor pago'; }
+    #tab-fin .fin-table td:nth-child(10)::before{ content:'% da parcela'; }
+    #tab-fin .fin-table td:nth-child(3){ grid-column:1; grid-row:2; }
+    #tab-fin .fin-table td:nth-child(4){ grid-column:2; grid-row:2; }
+    #tab-fin .fin-table td:nth-child(5){ grid-column:3; grid-row:2; }
+    #tab-fin .fin-table td:nth-child(6){ grid-column:1 / 3; grid-row:3; }
+    #tab-fin .fin-table td:nth-child(10){ grid-column:3; grid-row:3; }
+    #tab-fin .fin-table td:nth-child(8){ grid-column:1 / 3; grid-row:4; }
+    #tab-fin .fin-table td:nth-child(9){ grid-column:3; grid-row:4; }
+    #tab-fin .fin-table td:nth-child(8) input, #tab-fin .fin-table td:nth-child(9) input{ height:42px; width:100%; }
+    #tab-fin .fin-table td:nth-child(9) input{ min-width:0; }
+    /* parcela pendente: os campos de pagamento ficam desativados, então não ocupam espaço */
+    #tab-fin .fin-table tbody tr:has(select.situ-pendente) td:nth-child(8),
+    #tab-fin .fin-table tbody tr:has(select.situ-pendente) td:nth-child(9){ display:none !important; }
+    .chart-grid, .cat-columns, .cfg-columns{ grid-template-columns:minmax(0,1fr); }
+    .cat-panel, .cfg-card, .chart-card{ min-width:0; }
+    .cat-panel input, .cfg-card input{ min-width:0; }
+    .kpi-card{ min-width:0; }
+    #tab-orc .kpi-value, #tab-fin .kpi-value{ font-size:17px; white-space:nowrap; }
+    #tab-orc .kpi-card, #tab-fin .kpi-card{ padding-left:20px; padding-right:12px; }
+    .fin-parcelas-grid{ grid-template-columns:repeat(2,1fr); }
+  }
 </style>
 </head>
 <body>
@@ -458,6 +633,16 @@
     <p class="lock-error" id="lockError"></p>
   </div>
 </div>
+
+<!-- BARRA SUPERIOR E FUNDO DO MENU (só aparecem no celular) -->
+<div class="m-topbar" id="mTopbar">
+  <button class="m-menu-btn" id="menuBtn" aria-label="Abrir menu" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <span class="m-title" id="mTopTitle">Dashboard</span>
+  <span class="m-sync" id="mSync"></span>
+</div>
+<div class="menu-backdrop" id="menuBackdrop"></div>
 
 <div class="shell">
   <aside class="sidebar">
@@ -1115,11 +1300,11 @@
         <div class="mov-form-row">
           <div class="field-inline valor-w">
             <label>Valor financiado</label>
-            <input type="text" id="finValorFinanciado" value="0,00">
+            <input type="text" id="finValorFinanciado" value="0,00" inputmode="decimal">
           </div>
           <div class="field-inline pag-w">
             <label>Taxa a.m. (%)</label>
-            <input type="text" id="finTaxa" value="0,00">
+            <input type="text" id="finTaxa" value="0,00" inputmode="decimal">
           </div>
           <div class="field-inline parc-w">
             <label>Prazo</label>
@@ -3374,7 +3559,7 @@ function finRowHtml(row){
     <td class="money">${fmt(row.saldoDevedor)}</td>
     <td><select class="fin-situacao ${situClass}"><option value="Pendente" ${row.situacao==='Pendente'?'selected':''}>Pendente</option><option value="Paga" ${row.situacao==='Paga'?'selected':''}>Paga</option></select></td>
     <td><input type="date" class="fin-data-pag" value="${row.dataPagamento||''}" ${disabled}></td>
-    <td><input type="text" class="fin-valor-pag" value="${row.valorPagamento!=null ? row.valorPagamento.toFixed(2).replace('.',',') : ''}" placeholder="R$ 0,00" ${disabled}></td>
+    <td><input type="text" class="fin-valor-pag" inputmode="decimal" value="${row.valorPagamento!=null ? row.valorPagamento.toFixed(2).replace('.',',') : ''}" placeholder="R$ 0,00" ${disabled}></td>
     <td class="pct-cell">${pctCellHtml(row)}</td>
   </tr>`;
 }
@@ -4057,7 +4242,7 @@ function renderOrcTable(){
       const diff = planejado - realizado;
       return `<tr data-cat="${cat}">
         <td>${cat}</td>
-        <td><input type="text" class="orc-planejado" data-cat="${cat}" value="${planejado ? planejado.toFixed(2).replace('.',',') : ''}" placeholder="R$ 0,00"></td>
+        <td><input type="text" class="orc-planejado" inputmode="decimal" data-cat="${cat}" value="${planejado ? planejado.toFixed(2).replace('.',',') : ''}" placeholder="R$ 0,00"></td>
         <td class="money">${fmt(realizado)}</td>
         <td class="money orc-diff-cell ${diff>=0?'diff-pos':'diff-neg'}">${fmt(diff)}</td>
       </tr>`;
@@ -4205,6 +4390,8 @@ function odSetStatus(kind, detail){
   }
   el.textContent = text; el.className = cls;
   if(side) side.textContent = sideText;
+  const mSync = document.getElementById('mSync');
+  if(mSync) mSync.textContent = sideText.replace('☁ OneDrive: ','☁ ');
   login.style.display = showLogin ? 'inline-flex' : 'none';
   syncB.style.display = showConnected ? 'inline-flex' : 'none';
   logout.style.display = (showConnected || kind === 'login') ? 'inline-flex' : 'none';
@@ -4452,6 +4639,51 @@ async function odInit(){
   window.addEventListener('online', ()=> odSync('resume'));
   setInterval(()=>{ if(!document.hidden) odSync('poll'); }, 180000);
 }
+
+/* ============================================================
+   MENU LATERAL OCULTO (celular) — abre deslizando da borda esquerda
+   ou tocando no botão de menu; fecha ao tocar fora, deslizar para
+   a esquerda ou escolher uma aba.
+   ============================================================ */
+(function initMobileMenu(){
+  const mq = window.matchMedia('(max-width: 760px)');
+  const body = document.body;
+  const btn = document.getElementById('menuBtn');
+  const backdrop = document.getElementById('menuBackdrop');
+  const title = document.getElementById('mTopTitle');
+  const openMenu = ()=>{ if(mq.matches) body.classList.add('menu-open'); };
+  const closeMenu = ()=> body.classList.remove('menu-open');
+  function updateTitle(){
+    const a = document.querySelector('.tab-btn.active .label');
+    title.textContent = a ? a.textContent : 'Hanemann Finance';
+  }
+  btn.addEventListener('click', ()=> body.classList.contains('menu-open') ? closeMenu() : openMenu());
+  backdrop.addEventListener('click', closeMenu);
+  document.querySelectorAll('.tab-btn').forEach(b=> b.addEventListener('click', ()=>{ closeMenu(); setTimeout(updateTitle, 0); window.scrollTo(0,0); }));
+  document.addEventListener('keydown', e=>{ if(e.key === 'Escape') closeMenu(); });
+  if(mq.addEventListener) mq.addEventListener('change', closeMenu);
+
+  /* gesto: começa perto da borda esquerda e vai para a direita = abre; com o menu aberto, para a esquerda = fecha */
+  let sx = 0, sy = 0, tracking = false, mode = '';
+  document.addEventListener('touchstart', e=>{
+    if(!mq.matches || e.touches.length !== 1) return;
+    const t = e.touches[0]; sx = t.clientX; sy = t.clientY;
+    if(body.classList.contains('menu-open')){ tracking = true; mode = 'close'; }
+    else { tracking = sx <= 36; mode = 'open'; }
+  }, {passive:true});
+  document.addEventListener('touchmove', e=>{
+    if(!tracking) return;
+    const t = e.touches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if(Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4){
+      if(mode === 'open' && dx > 0) openMenu();
+      if(mode === 'close' && dx < 0) closeMenu();
+      tracking = false;
+    } else if(Math.abs(dy) > 28 && Math.abs(dy) > Math.abs(dx)){ tracking = false; }
+  }, {passive:true});
+  document.addEventListener('touchend', ()=>{ tracking = false; }, {passive:true});
+  document.addEventListener('touchcancel', ()=>{ tracking = false; }, {passive:true});
+  updateTitle();
+})();
 
 /* ============ INIT ============ */
 (async function initApp(){
