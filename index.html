@@ -1063,11 +1063,11 @@
             </div>
             <div class="field-inline valor-w">
               <label>Preço total</label>
-              <input type="text" id="opPreco" placeholder="R$ 0,00" title="Valor total da operação (quantidade × preço unitário), sem contar taxas">
+              <input type="text" id="opPreco" inputmode="numeric" placeholder="R$ 0,00" title="Valor total da operação (quantidade × preço unitário), sem contar taxas">
             </div>
             <div class="field-inline valor-w">
               <label>Taxas</label>
-              <input type="text" id="opTaxas" placeholder="R$ 0,00" value="0,00">
+              <input type="text" id="opTaxas" inputmode="numeric" placeholder="R$ 0,00" value="0,00">
             </div>
             <div class="field-inline data-w">
               <label>Data</label>
@@ -1217,11 +1217,11 @@
             </div>
             <div class="field-inline valor-w">
               <label>Valor líquido</label>
-              <input type="text" id="divValorLiquido" placeholder="R$ 0,00">
+              <input type="text" id="divValorLiquido" inputmode="numeric" placeholder="R$ 0,00">
             </div>
             <div class="field-inline valor-w">
               <label>IR retido</label>
-              <input type="text" id="divIR" placeholder="R$ 0,00" value="0,00">
+              <input type="text" id="divIR" inputmode="numeric" placeholder="R$ 0,00" value="0,00">
             </div>
             <div class="field-inline btn-w">
               <label>&nbsp;</label>
@@ -2143,17 +2143,28 @@ function attachInlineAutocomplete(inputEl){
 
 /* máscara de valor "estilo app de banco": os dígitos digitados entram
    pela direita como centavos, sem precisar digitar vírgula ou ponto. */
-function attachCurrencyMask(inputEl){
-  inputEl.addEventListener('input', ()=>{
-    let digits = inputEl.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
-    if(!digits){ inputEl.value = ''; return; }
-    while(digits.length < 3) digits = '0' + digits;
-    const cents = digits.slice(-2);
-    const intPart = digits.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    inputEl.value = `${intPart},${cents}`;
-    inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
-  });
+function maskCurrencyInput(inputEl){
+  let digits = inputEl.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+  if(!digits){ inputEl.value = ''; return; }
+  while(digits.length < 3) digits = '0' + digits;
+  const cents = digits.slice(-2);
+  const intPart = digits.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  inputEl.value = `${intPart},${cents}`;
+  try{ inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length); }catch(e){}
 }
+function attachCurrencyMask(inputEl){
+  inputEl.addEventListener('input', ()=> maskCurrencyInput(inputEl));
+}
+/* número -> texto no mesmo formato da máscara (ex.: 2631.27 -> "2.631,27") */
+function inputValor(n){
+  if(n == null || isNaN(n)) return '';
+  return Number(n).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+/* Investimentos: valores das Operações e dos Dividendos também entram como centavos, sem vírgula */
+['opPreco','opTaxas','divValorLiquido','divIR'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el){ el.setAttribute('inputmode','numeric'); attachCurrencyMask(el); }
+});
 
 function getMovReferenceDate(){
   const hoje = todayISO();
@@ -2956,8 +2967,8 @@ function startEditOp(id){
   document.getElementById('opAtivo').value = rec.ativoCodigo;
   updateOpAtivoAuto();
   document.getElementById('opQuantidade').value = rec.quantidade;
-  document.getElementById('opPreco').value = rec.preco.toFixed(2).replace('.',',');
-  document.getElementById('opTaxas').value = rec.taxas.toFixed(2).replace('.',',');
+  document.getElementById('opPreco').value = inputValor(rec.preco);
+  document.getElementById('opTaxas').value = inputValor(rec.taxas);
   document.getElementById('opData').value = rec.data;
   document.getElementById('opObs').value = rec.observacoes || '';
   document.querySelector('#inv-sub-operacoes .mov-form-card').scrollIntoView({behavior:'smooth', block:'start'});
@@ -3278,8 +3289,8 @@ function startEditDiv(id){
   document.getElementById('divAtivo').value = rec.ativoCodigo;
   document.getElementById('divTipo').value = rec.tipo;
   document.getElementById('divData').value = rec.data;
-  document.getElementById('divValorLiquido').value = rec.valorLiquido.toFixed(2).replace('.',',');
-  document.getElementById('divIR').value = rec.irRetido.toFixed(2).replace('.',',');
+  document.getElementById('divValorLiquido').value = inputValor(rec.valorLiquido);
+  document.getElementById('divIR').value = inputValor(rec.irRetido);
   document.querySelector('#inv-sub-dividendos .mov-form-card').scrollIntoView({behavior:'smooth', block:'start'});
 }
 document.getElementById('divCancelEditBtn').addEventListener('click', resetDivForm);
@@ -3559,7 +3570,7 @@ function finRowHtml(row){
     <td class="money">${fmt(row.saldoDevedor)}</td>
     <td><select class="fin-situacao ${situClass}"><option value="Pendente" ${row.situacao==='Pendente'?'selected':''}>Pendente</option><option value="Paga" ${row.situacao==='Paga'?'selected':''}>Paga</option></select></td>
     <td><input type="date" class="fin-data-pag" value="${row.dataPagamento||''}" ${disabled}></td>
-    <td><input type="text" class="fin-valor-pag" inputmode="decimal" value="${row.valorPagamento!=null ? row.valorPagamento.toFixed(2).replace('.',',') : ''}" placeholder="R$ 0,00" ${disabled}></td>
+    <td><input type="text" class="fin-valor-pag" inputmode="numeric" value="${row.valorPagamento!=null ? inputValor(row.valorPagamento) : ''}" placeholder="R$ 0,00" ${disabled}></td>
     <td class="pct-cell">${pctCellHtml(row)}</td>
   </tr>`;
 }
@@ -3587,10 +3598,14 @@ function updateFinRow(num){
   dataPagInput.disabled = disabled;
   valorPagInput.disabled = disabled;
   dataPagInput.value = row.dataPagamento || '';
-  valorPagInput.value = row.valorPagamento != null ? row.valorPagamento.toFixed(2).replace('.',',') : '';
+  valorPagInput.value = row.valorPagamento != null ? inputValor(row.valorPagamento) : '';
   tr.querySelector('.pct-cell').innerHTML = pctCellHtml(row);
   if(typeof scheduleSave === 'function') scheduleSave();
 }
+
+document.getElementById('finTableBody').addEventListener('input', (e)=>{
+  if(e.target.classList && e.target.classList.contains('fin-valor-pag')) maskCurrencyInput(e.target);
+});
 
 document.getElementById('finTableBody').addEventListener('change', (e)=>{
   const tr = e.target.closest('tr[data-num]');
@@ -3606,7 +3621,7 @@ document.getElementById('finTableBody').addEventListener('change', (e)=>{
     if(row.situacao === 'Pendente'){
       row.dataPagamento = null; row.valorPagamento = null;
     } else if(!row.dataPagamento){
-      row.dataPagamento = row.vencimento; row.valorPagamento = row.valorParcela;
+      row.dataPagamento = todayISO(); row.valorPagamento = row.valorParcela; // pago agora: data de hoje, nunca a do vencimento futuro
     }
     updateFinRow(num);
     updateFinKPIs();
