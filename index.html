@@ -198,6 +198,33 @@
   .chart-filters{ display:flex; gap:6px; flex:none; }
   .chart-wrap{ position:relative; height:260px; }
   .chart-wrap.tall{ height:260px; }
+  .chart-card{ min-width:0; }
+  .chart-grid.two{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .chart-empty{ padding:36px 10px; text-align:center; color:var(--muted); font-size:13px; margin:0; }
+  .lg{ display:flex; flex-wrap:wrap; gap:6px 14px; font-size:11.5px; color:var(--muted); margin:0 0 8px; }
+  .lg span{ display:inline-flex; align-items:center; gap:5px; }
+  .lg i{ width:10px; height:10px; border-radius:2px; display:inline-block; }
+  .lg .plan{ background:#C9D1C2; }
+  body.dark-mode .lg .plan{ background:#4A4A4A; }
+  .lg .ok{ background:var(--green); }
+  .lg .bad{ background:var(--brick); }
+  .lg .nob{ background:var(--gold); }
+  .lg .tail{ background:var(--brick); opacity:.4; }
+  .lg .ln{ height:3px; width:14px; background:var(--gold); }
+  .lg .dash{ height:0; width:14px; border-top:2px dashed var(--muted); background:none; }
+  /* mapa de calor */
+  .hm{ display:grid; grid-template-columns:minmax(90px,150px) repeat(12,minmax(0,1fr)) 72px; gap:3px; align-items:center; }
+  .hm-h{ text-align:center; font-size:11px; color:var(--muted); padding-bottom:2px; }
+  .hm-h .ini{ display:none; }
+  .hm-l{ font-size:12px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:6px; }
+  .hm-c{ height:30px; border-radius:4px; display:flex; align-items:center; justify-content:center; font:500 10px 'IBM Plex Mono',monospace; color:var(--ink); background:var(--paper); cursor:pointer; min-width:0; overflow:hidden; }
+  .hm-c:hover{ outline:2px solid var(--gold); outline-offset:-1px; }
+  .hm-c.hm-sum{ background:transparent; font-weight:600; }
+  .hm-t{ text-align:right; font:600 11px 'IBM Plex Mono',monospace; color:var(--ink-soft); }
+  .hm-info{ min-height:18px; margin:10px 0 2px; font-size:12px; color:var(--ink-soft); }
+  .hm-scale{ display:flex; align-items:center; gap:8px; font-size:11px; color:var(--muted); margin:4px 0 8px; }
+  .hm-scale i{ display:block; width:90px; height:8px; border-radius:4px; background:linear-gradient(90deg, rgba(163,73,47,.12), rgba(163,73,47,1)); }
+  body.dark-mode .hm-scale i{ background:linear-gradient(90deg, rgba(240,112,90,.12), rgba(240,112,90,1)); }
 
   footer.hf{ text-align:center; color:var(--muted); font-size:11.5px; margin-top:30px; }
 
@@ -323,7 +350,7 @@
     .tab-btn span.label{ display:none; }
     .sidebar-foot{ display:none; }
     .kpi-grid, .insights-row{ grid-template-columns:repeat(2,1fr); }
-    .chart-grid, .cat-columns{ grid-template-columns:1fr; }
+    .chart-grid, .cat-columns, .chart-grid.two{ grid-template-columns:1fr; }
     .mov-form-row{ flex-direction:column; align-items:stretch; }
     .mov-form-row .field-inline{ flex:1 1 auto !important; width:100%; }
     main{ padding:20px 16px 40px; }
@@ -617,6 +644,14 @@
     #tab-orc .kpi-value, #tab-fin .kpi-value{ font-size:17px; white-space:nowrap; }
     #tab-orc .kpi-card, #tab-fin .kpi-card{ padding-left:20px; padding-right:12px; }
     .fin-parcelas-grid{ grid-template-columns:repeat(2,1fr); }
+    .chart-grid.two{ grid-template-columns:minmax(0,1fr); }
+    .chart-card{ padding:16px 12px 10px; }
+    .hm{ grid-template-columns:minmax(64px,88px) repeat(12,minmax(0,1fr)); gap:2px; }
+    .hm-c{ font-size:0; height:24px; }
+    .hm-t, .hm-th{ display:none; }
+    .hm-h .full{ display:none; }
+    .hm-h .ini{ display:inline; }
+    .hm-l{ font-size:11px; }
   }
 </style>
 </head>
@@ -966,6 +1001,60 @@
             </div>
           </div>
           <div class="chart-wrap"><canvas id="relChartCat"></canvas></div>
+        </div>
+      </div>
+
+      <div class="section-label">Análise detalhada</div>
+      <div class="chart-grid two">
+        <div class="chart-card">
+          <div class="chart-card-head">
+            <div>
+              <h3>Orçado × Realizado</h3>
+              <p class="sub" id="relOrcSub">Planejado na aba Orçamento contra o gasto real</p>
+            </div>
+            <div class="chart-filters"><select class="mini" id="relOrcMes"></select></div>
+          </div>
+          <div class="lg"><span><i class="plan"></i>Planejado</span><span><i class="ok"></i>Dentro do plano</span><span><i class="bad"></i>Acima do plano</span><span><i class="nob"></i>Sem orçamento</span></div>
+          <div class="chart-wrap" id="relOrcWrap"><canvas id="relChartOrc"></canvas></div>
+          <p class="chart-empty" id="relOrcEmpty" style="display:none"></p>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-head">
+            <div>
+              <h3>Fluxo do mês</h3>
+              <p class="sub" id="relFluxoSub">Da receita até o que sobrou</p>
+            </div>
+            <div class="chart-filters"><select class="mini" id="relFluxoMes"></select></div>
+          </div>
+          <div class="lg"><span><i class="ok"></i>Receitas / sobra</span><span><i class="bad"></i>Despesas por categoria / falta</span></div>
+          <div class="chart-wrap" id="relFluxoWrap"><canvas id="relChartFluxo"></canvas></div>
+          <p class="chart-empty" id="relFluxoEmpty" style="display:none"></p>
+        </div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-card-head">
+            <div>
+              <h3>Mapa de calor — categorias × meses</h3>
+              <p class="sub" id="relHeatSub">Despesas por categoria e mês</p>
+            </div>
+            <div class="chart-filters">
+              <select class="mini" id="relHeatEsc">
+                <option value="cat">Cor por categoria</option>
+                <option value="geral">Cor geral</option>
+              </select>
+            </div>
+          </div>
+          <div id="relHeat"></div>
+          <div class="hm-info" id="relHeatInfo">Toque (ou passe o mouse) em uma célula para ver o valor.</div>
+          <div class="hm-scale"><span>menor</span><i></i><span>maior</span></div>
+        </div>
+        <div class="chart-card">
+          <h3>Pareto dos gastos (80/20)</h3>
+          <p class="sub" id="relParetoSub">Quais categorias concentram a maior parte da despesa</p>
+          <div class="lg" style="margin-top:8px"><span><i class="bad"></i>Categorias até 80% do gasto</span><span><i class="tail"></i>Demais</span><span><i class="ln"></i>% acumulado</span><span><i class="dash"></i>Meta 80%</span></div>
+          <div class="chart-wrap" id="relParetoWrap" style="height:300px"><canvas id="relChartPareto"></canvas></div>
+          <p class="chart-empty" id="relParetoEmpty" style="display:none"></p>
         </div>
       </div>
 
@@ -2747,11 +2836,260 @@ function renderComparativos(){
   document.getElementById('relComparativos').innerHTML = html;
 }
 
+/* ---------- Análise detalhada: Orçado×Realizado, Fluxo, Mapa de calor, Pareto ---------- */
+function relRefYear(){ const a = document.getElementById('relAno').value; return a === 'todos' ? String(currentYear) : a; }
+function relShort(s, n){ n = n || 16; return s.length > n ? s.slice(0, n-1) + '…' : s; }
+function relEsc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function relAxisK(v){ return 'R$ ' + (Math.abs(v) >= 1000 ? (v/1000).toLocaleString('pt-BR', {maximumFractionDigits:1}) + 'k' : v); }
+function relCores(){
+  return isDarkMode()
+    ? {green:'#1ED760', brick:'#F0705A', gold:'#E8B84B', plan:'#4A4A4A', muted:'#B3B3B3'}
+    : {green:'#2E6B49', brick:'#A3492F', gold:'#B4863A', plan:'#C9D1C2', muted:'#6E7A70'};
+}
+function relSetEmpty(wrapId, emptyId, msg){
+  const w = document.getElementById(wrapId), e = document.getElementById(emptyId);
+  if(w) w.style.display = msg ? 'none' : '';
+  if(e){ e.style.display = msg ? '' : 'none'; if(msg) e.textContent = msg; }
+}
+function relSetHeight(wrapId, rows, perRow, extra){
+  document.getElementById(wrapId).style.height = Math.max(220, rows*perRow + extra) + 'px';
+}
+function relPeriodoMes(selId){
+  const mi = parseInt(document.getElementById(selId).value);
+  const ano = relRefYear();
+  return { mi, ano, ym: `${ano}-${String(mi+1).padStart(2,'0')}` };
+}
+
+let relOrcInst = null;
+function renderRelOrc(){
+  if(relOrcInst){ relOrcInst.destroy(); relOrcInst = null; }
+  const p = relPeriodoMes('relOrcMes');
+  const budget = orcamentos[p.ym] || {};
+  const cats = new Set(Object.keys(budget).filter(c => budget[c] > 0));
+  movimentacoes.filter(m => m.tipo==='despesa' && m.data.slice(0,7)===p.ym).forEach(m => cats.add(m.categoria));
+  const rows = [...cats].map(c => ({ cat:c, plan:budget[c]||0, real:getRealizado(p.ym, c) }))
+    .filter(r => r.plan > 0 || r.real > 0)
+    .sort((a,b) => (b.real - a.real) || (b.plan - a.plan));
+  const totPlan = rows.reduce((a,r)=>a+r.plan, 0);
+  const realOrc = rows.filter(r => r.plan > 0).reduce((a,r)=>a+r.real, 0);
+  const semOrc = rows.filter(r => r.plan === 0).reduce((a,r)=>a+r.real, 0);
+  document.getElementById('relOrcSub').textContent = totPlan > 0
+    ? `${months[p.mi]}/${p.ano} · ${Math.round(realOrc/totPlan*100)}% do planejado usado` + (semOrc > 0 ? ` · ${fmt(semOrc)} sem orçamento` : '')
+    : `${months[p.mi]}/${p.ano} · nenhum valor planejado`;
+  if(!rows.length){ relSetEmpty('relOrcWrap','relOrcEmpty','Sem orçamento nem despesas neste mês. Defina os valores na aba Orçamento.'); return; }
+  if(!CHARTS_AVAILABLE){ relSetEmpty('relOrcWrap','relOrcEmpty','Gráfico indisponível: a biblioteca de gráficos não carregou.'); return; }
+  relSetEmpty('relOrcWrap','relOrcEmpty','');
+  relSetHeight('relOrcWrap', rows.length, 42, 50);
+  const c = relCores();
+  relOrcInst = new Chart(document.getElementById('relChartOrc'), {
+    type:'bar',
+    data:{ labels: rows.map(r => relShort(r.cat)), datasets:[
+      { label:'Planejado', data: rows.map(r=>r.plan), backgroundColor:c.plan, borderRadius:3, barThickness:11,
+        datalabels:{ anchor:'end', align:'end', color:c.muted, font:{size:9}, formatter:v => v ? dlCompact(v) : '' } },
+      { label:'Realizado', data: rows.map(r=>r.real), borderRadius:3, barThickness:11,
+        backgroundColor: rows.map(r => r.plan === 0 ? c.gold : (r.real > r.plan ? c.brick : c.green)),
+        datalabels:{ anchor:'end', align:'end', color:dlColor(), font:{size:9.5, weight:600},
+          formatter:(v, ctx) => { const r = rows[ctx.dataIndex]; const t = v ? dlCompact(v) : '0'; return r.plan > 0 ? `${t} · ${Math.round(v/r.plan*100)}%` : t; } } },
+    ]},
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      layout:{ padding:{ right:62 } },
+      plugins:{ legend:{display:false},
+        tooltip:{ callbacks:{
+          title: items => rows[items[0].dataIndex].cat,
+          label: ctx => `${ctx.dataset.label}: ${fmt(ctx.raw)}`,
+          afterBody: items => { const r = rows[items[0].dataIndex]; return r.plan > 0 ? [`${r.plan >= r.real ? 'Sobra' : 'Estouro'}: ${fmt(Math.abs(r.plan - r.real))}`] : ['Sem orçamento definido']; }
+        } } },
+      scales:{ x:{ beginAtZero:true, grid:{color:chartGridColor()}, border:{display:false}, ticks:{ callback:relAxisK } },
+               y:{ grid:{display:false}, border:{display:false}, ticks:{ font:{size:10.5} } } }
+    }
+  });
+}
+
+let relFluxoInst = null;
+function renderRelFluxo(){
+  if(relFluxoInst){ relFluxoInst.destroy(); relFluxoInst = null; }
+  const p = relPeriodoMes('relFluxoMes');
+  const mm = movimentacoes.filter(m => m.data.slice(0,7) === p.ym);
+  const receita = mm.filter(m => m.tipo==='receita').reduce((a,m)=>a+m.valor, 0);
+  const byCat = {};
+  mm.filter(m => m.tipo==='despesa').forEach(m => byCat[m.categoria] = (byCat[m.categoria]||0) + m.valor);
+  const sorted = Object.entries(byCat).sort((a,b) => b[1]-a[1]);
+  const TOP = 7;
+  let itens = sorted.length <= TOP + 1 ? sorted.slice() : sorted.slice(0, TOP);
+  if(sorted.length > TOP + 1) itens.push(['Outras', sorted.slice(TOP).reduce((a,e)=>a+e[1], 0)]);
+  const sub = document.getElementById('relFluxoSub');
+  if(receita === 0 && !sorted.length){
+    sub.textContent = `${months[p.mi]}/${p.ano}`;
+    relSetEmpty('relFluxoWrap','relFluxoEmpty','Sem movimentações neste mês.'); return;
+  }
+  let run = receita;
+  const labels = ['Receitas'], floats = [[0, receita]], vals = [receita];
+  itens.forEach(([cat, v]) => { labels.push(cat); floats.push([run - v, run]); vals.push(-v); run -= v; });
+  const sobra = run;
+  labels.push(sobra >= 0 ? 'Sobra' : 'Falta');
+  floats.push(sobra >= 0 ? [0, sobra] : [sobra, 0]);
+  vals.push(sobra);
+  sub.textContent = `${months[p.mi]}/${p.ano} · ${sobra >= 0 ? 'sobra' : 'falta'} ${fmt(Math.abs(sobra))}` + (receita > 0 ? ` (${Math.round(Math.abs(sobra)/receita*100)}% da receita)` : '');
+  if(!CHARTS_AVAILABLE){ relSetEmpty('relFluxoWrap','relFluxoEmpty','Gráfico indisponível: a biblioteca de gráficos não carregou.'); return; }
+  relSetEmpty('relFluxoWrap','relFluxoEmpty','');
+  relSetHeight('relFluxoWrap', labels.length, 34, 50);
+  const c = relCores();
+  const colors = labels.map((l, i) => i === 0 ? c.green : (i === labels.length-1 ? (sobra >= 0 ? c.green : c.brick) : c.brick));
+  relFluxoInst = new Chart(document.getElementById('relChartFluxo'), {
+    type:'bar',
+    data:{ labels: labels.map(l => relShort(l)), datasets:[{ data:floats, backgroundColor:colors, borderRadius:4, barThickness:18 }] },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      layout:{ padding:{ right:52 } },
+      plugins:{ legend:{display:false},
+        tooltip:{ callbacks:{
+          title: items => labels[items[0].dataIndex],
+          label: ctx => { const v = vals[ctx.dataIndex]; return (v < 0 ? '−' : '') + fmt(Math.abs(v)) + (receita > 0 && ctx.dataIndex > 0 && ctx.dataIndex < labels.length-1 ? ` · ${Math.round(Math.abs(v)/receita*100)}% da receita` : ''); }
+        } },
+        datalabels:{ anchor:'end', align:'end', color:dlColor(), font:{size:9.5, weight:600},
+          formatter:(v, ctx) => { const x = vals[ctx.dataIndex]; return (x < 0 ? '−' : '') + (dlCompact(Math.abs(x)) || '0'); } } },
+      scales:{ x:{ grid:{color:chartGridColor()}, border:{display:false}, ticks:{ callback:relAxisK } },
+               y:{ grid:{display:false}, border:{display:false}, ticks:{ font:{size:10.5} } } }
+    }
+  });
+}
+
+let relHeatRows = [], relHeatMonthTot = [], relHeatAno = '';
+function renderRelHeat(){
+  const ano = relRefYear();
+  const catFilter = document.getElementById('relCategoria').value;
+  const modo = document.getElementById('relHeatEsc').value;
+  const tot = {};
+  movimentacoes.filter(m => m.tipo==='despesa' && m.data.slice(0,4)===ano && (catFilter==='todos' || m.categoria===catFilter)).forEach(m => {
+    const i = parseInt(m.data.slice(5,7)) - 1;
+    (tot[m.categoria] = tot[m.categoria] || Array(12).fill(0))[i] += m.valor;
+  });
+  relHeatAno = ano;
+  relHeatRows = Object.entries(tot).map(([cat, vals]) => ({ cat, vals, total: vals.reduce((a,b)=>a+b, 0) })).sort((a,b) => b.total - a.total);
+  relHeatMonthTot = months.map((_, i) => relHeatRows.reduce((a,r) => a + r.vals[i], 0));
+  const box = document.getElementById('relHeat');
+  document.getElementById('relHeatSub').textContent = `Despesas de ${ano} por categoria e mês`;
+  document.getElementById('relHeatInfo').textContent = 'Toque (ou passe o mouse) em uma célula para ver o valor.';
+  if(!relHeatRows.length){ box.innerHTML = '<p class="chart-empty">Sem despesas em ' + ano + '.</p>'; return; }
+  const gmax = Math.max(...relHeatRows.map(r => Math.max(...r.vals)));
+  const rgb = isDarkMode() ? '240,112,90' : '163,73,47';
+  const txtOn = isDarkMode() ? '#121212' : '#FFFFFF';
+  let h = '<div class="hm"><div></div>' + months.map(m => `<div class="hm-h"><span class="full">${m}</span><span class="ini">${m.charAt(0)}</span></div>`).join('') + '<div class="hm-h hm-th">Total</div>';
+  relHeatRows.forEach((r, ri) => {
+    const rmax = Math.max(...r.vals);
+    h += `<div class="hm-l" title="${relEsc(r.cat)}">${relEsc(r.cat)}</div>`;
+    r.vals.forEach((v, mi) => {
+      if(v <= 0){ h += `<div class="hm-c" data-r="${ri}" data-m="${mi}"></div>`; return; }
+      const f = modo === 'cat' ? v / rmax : Math.sqrt(v / gmax);
+      const a = 0.12 + 0.88 * f;
+      h += `<div class="hm-c" data-r="${ri}" data-m="${mi}" style="background:rgba(${rgb},${a.toFixed(2)});color:${a > 0.5 ? txtOn : 'var(--ink)'}">${dlCompact(v)}</div>`;
+    });
+    h += `<div class="hm-t">${dlCompact(r.total)}</div>`;
+  });
+  h += '<div class="hm-l"><b>Total</b></div>' + relHeatMonthTot.map((v, mi) => `<div class="hm-c hm-sum" data-r="-1" data-m="${mi}">${dlCompact(v)}</div>`).join('');
+  h += `<div class="hm-t">${dlCompact(relHeatMonthTot.reduce((a,b)=>a+b, 0))}</div></div>`;
+  box.innerHTML = h;
+}
+function relHeatShowInfo(e){
+  const c = e.target.closest ? e.target.closest('.hm-c') : null;
+  if(!c || c.dataset.m === undefined) return;
+  const mi = +c.dataset.m, ri = +c.dataset.r;
+  let txt;
+  if(ri < 0) txt = `Total · ${months[mi]}/${relHeatAno}: ${fmt(relHeatMonthTot[mi])}`;
+  else {
+    const r = relHeatRows[ri]; if(!r) return;
+    const v = r.vals[mi];
+    txt = `${r.cat} · ${months[mi]}/${relHeatAno}: ${fmt(v)}` + (v > 0 && r.total > 0 ? ` (${Math.round(v/r.total*100)}% do ano nesta categoria)` : '');
+  }
+  document.getElementById('relHeatInfo').textContent = txt;
+}
+
+let relParetoInst = null;
+function renderRelPareto(){
+  if(relParetoInst){ relParetoInst.destroy(); relParetoInst = null; }
+  const list = relFilteredList().filter(m => m.tipo === 'despesa');
+  const byCat = {};
+  list.forEach(m => byCat[m.categoria] = (byCat[m.categoria]||0) + m.valor);
+  const sorted = Object.entries(byCat).sort((a,b) => b[1]-a[1]);
+  const total = sorted.reduce((a,e)=>a+e[1], 0);
+  const anoSel = document.getElementById('relAno').value, mesSel = document.getElementById('relMes').value;
+  const periodo = (mesSel === 'todos' ? '' : months[parseInt(mesSel)] + '/') + (anoSel === 'todos' ? 'todos os anos' : anoSel);
+  const sub = document.getElementById('relParetoSub');
+  if(total <= 0){
+    sub.textContent = 'Quais categorias concentram a maior parte da despesa';
+    relSetEmpty('relParetoWrap','relParetoEmpty','Sem despesas no período filtrado.'); return;
+  }
+  let acc = 0, k80 = sorted.length;
+  for(let i = 0; i < sorted.length; i++){ acc += sorted[i][1]; if(acc / total >= 0.8){ k80 = i + 1; break; } }
+  sub.textContent = `${k80} de ${sorted.length} ${sorted.length === 1 ? 'categoria concentra' : 'categorias concentram'} 80% das despesas · ${periodo}`;
+  if(!CHARTS_AVAILABLE){ relSetEmpty('relParetoWrap','relParetoEmpty','Gráfico indisponível: a biblioteca de gráficos não carregou.'); return; }
+  relSetEmpty('relParetoWrap','relParetoEmpty','');
+  const TOP = 10;
+  let itens = sorted.length <= TOP + 1 ? sorted.slice() : sorted.slice(0, TOP);
+  if(sorted.length > TOP + 1) itens.push([`Outras (${sorted.length - TOP})`, sorted.slice(TOP).reduce((a,e)=>a+e[1], 0)]);
+  let run = 0;
+  const cum = itens.map(e => { run += e[1]; return run / total * 100; });
+  const c = relCores();
+  const faded = isDarkMode() ? 'rgba(240,112,90,0.4)' : 'rgba(163,73,47,0.4)';
+  relParetoInst = new Chart(document.getElementById('relChartPareto'), {
+    type:'bar',
+    data:{ labels: itens.map(e => relShort(e[0], 14)), datasets:[
+      { type:'bar', label:'Despesa', data: itens.map(e=>e[1]), yAxisID:'y', order:2, borderRadius:4, maxBarThickness:34,
+        backgroundColor: itens.map((e, i) => i < k80 ? c.brick : faded),
+        datalabels:{ anchor:'end', align:'top', color:dlColor(), font:{size:9.5, weight:600}, formatter:dlCompact } },
+      { type:'line', label:'% acumulado', data:cum, yAxisID:'y1', order:1, borderColor:c.gold, backgroundColor:c.gold, borderWidth:2, pointRadius:3, tension:0, datalabels:{display:false} },
+      { type:'line', label:'Meta 80%', data: itens.map(() => 80), yAxisID:'y1', order:0, borderColor:c.muted, borderDash:[5,4], borderWidth:1, pointRadius:0, datalabels:{display:false} },
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
+      layout:{ padding:{ top:12 } },
+      plugins:{ legend:{display:false},
+        tooltip:{ filter: it => it.dataset.label !== 'Meta 80%',
+          callbacks:{
+            title: items => itens[items[0].dataIndex][0],
+            label: ctx => ctx.dataset.yAxisID === 'y1' ? `% acumulado: ${ctx.raw.toFixed(0)}%` : `Despesa: ${fmt(ctx.raw)} (${(ctx.raw/total*100).toFixed(0)}% do total)`
+          } } },
+      scales:{
+        x:{ grid:{display:false}, border:{color:chartBorderColor()}, ticks:{ autoSkip:false, maxRotation:60, minRotation:0, font:{size:10} } },
+        y:{ beginAtZero:true, grid:{color:chartGridColor()}, border:{display:false}, ticks:{ callback:relAxisK } },
+        y1:{ position:'right', min:0, max:100, grid:{display:false}, border:{display:false}, ticks:{ callback:v => v + '%', stepSize:20 } }
+      }
+    }
+  });
+}
+
+let relAnaliseInit = false;
+function initRelAnalise(){
+  if(relAnaliseInit) return;
+  ['relOrcMes','relFluxoMes'].forEach(id => {
+    const s = document.getElementById(id);
+    s.innerHTML = months.map((m,i) => `<option value="${i}">${m}</option>`).join('');
+    s.value = String(currentMonthIdx);
+  });
+  document.getElementById('relOrcMes').addEventListener('change', renderRelOrc);
+  document.getElementById('relFluxoMes').addEventListener('change', renderRelFluxo);
+  document.getElementById('relHeatEsc').addEventListener('change', renderRelHeat);
+  const heat = document.getElementById('relHeat');
+  heat.addEventListener('click', relHeatShowInfo);
+  heat.addEventListener('mouseover', relHeatShowInfo);
+  relAnaliseInit = true;
+}
+function renderRelAnalise(){
+  initRelAnalise();
+  renderRelOrc();
+  renderRelFluxo();
+  renderRelHeat();
+  renderRelPareto();
+}
+
 function renderRelatorios(){
   syncRelCategoriaOptions();
   renderRelKPIs();
   renderRelChartRD();
   renderRelChartCat();
+  renderRelAnalise();
   renderComparativos();
 }
 
@@ -3712,6 +4050,7 @@ function refreshChartsForTheme(){
   }
   if(document.getElementById('relChartRD')) renderRelChartRD();
   if(document.getElementById('relChartCat')) renderRelChartCat();
+  if(document.getElementById('relChartOrc') && typeof renderRelAnalise === 'function') renderRelAnalise(); // recria com as cores do tema
 }
 async function loadDarkMode(){
   const val = await storageGet(DARK_KEY);
